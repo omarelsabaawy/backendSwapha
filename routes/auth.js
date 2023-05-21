@@ -374,4 +374,20 @@ router.post('/editProduct/:_id', protect, (req, res, next) => {
 
 });
 
+router.get('/getPublicProfile/:_id', (req, res, next) => {
+    const id = req.params._id;
+    User
+        .findById(id)
+        .populate('have.items.productId')
+        .populate('need.items.productId')
+        .then(user => {
+            if (!user) {
+                return res.json({ status: false });
+            } else {
+                return res.json({ status: true, user: user });
+            }
+        })
+        .catch(err => { console.log(err); });
+});
+
 module.exports = router;

@@ -6,12 +6,12 @@ const NotificationSchema = new mongoose.Schema({
     from: {
         type: Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        required: false
     },
     to: {
         type: Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        required: false
     },
     productId: {
         type: Schema.Types.ObjectId,
@@ -37,7 +37,12 @@ const NotificationSchema = new mongoose.Schema({
     declined: {
         type: Boolean,
         required: true
+    },
+    response: {
+        type: String,
+        required: false
     }
-});
+}, { timestamps: true }
+);
 
 module.exports = mongoose.model('Notification', NotificationSchema);

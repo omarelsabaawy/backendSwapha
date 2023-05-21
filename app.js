@@ -4,13 +4,14 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const session = require("express-session");
-
+const mongoose = require('mongoose');
 const indexRouter = require('./routes/index');
 const notificationRouter = require('./routes/notification');
 const authRouter = require('./routes/auth');
 const User = require('./Model/User');
 
 const testingRoutes = require('./routes/testing');
+const { Server } = require('http');
 
 const app = express();
 
@@ -65,5 +66,63 @@ app.use(function (err, req, res, next) {
   res.render('error');
 });
 
+const MONGODB_URI =
+  'mongodb+srv://swapha-app:YGzPJW1MV4AMNZ97@cluster0.h3wkjeo.mongodb.net/test';
+const port = process.env.PORT || 8000;
+mongoose
+  .connect(MONGODB_URI)
+  .then(result => {
+    console.log('mongoDb connected');
+  })
+  .catch(err => {
+    console.log(err);
+  });
 
-module.exports = app;
+const server = app.listen(port, () => {
+  console.log('connected on port ' + port);
+})
+
+const io = require('socket.io')(server, {
+  pingTimeout: 60000,
+  cors: {
+    origin: 'http://localhost:3000'
+  }
+})
+
+io.on("connection", (socket) => {
+  console.log("connected to socket.io");
+
+  socket.on("setup", (userData) => {
+    socket.join(userData._id);
+    socket.emit("connected");
+  })
+
+  socket.on("join", (room) => {
+    socket.join(room);
+  })
+
+  socket.on("Send Swap Request", (message) => {
+    socket.in(message.to).emit("Receive Message", message);
+  })
+
+  socket.on("Send Buy Request", (message) => {
+    socket.in(message.to).emit("Receive Message", message);
+  })
+
+  socket.on("send Acceptance", (message) => {
+    socket.in(message.to).emit("Receive Message", message);
+  })
+
+  socket.on("send Rejection", (message) => {
+    socket.in(message.to).emit("Receive Message", message);
+  })
+
+  socket.on("send Message", (message) => {
+    socket.in(message.to).emit("Receive Message", message);
+  })
+
+  socket.on("send Finalize Request", (message) => {
+    socket.in(message.to).emit("Receive Message", message);
+  })
+
+})
